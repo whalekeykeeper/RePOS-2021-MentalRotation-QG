@@ -26,30 +26,29 @@
       <KeypressScreen
         question="Are they the same object? Press f for yes or j for no."
         :feedback-time="1000"
-        :key = "'mr_training-' + i.toString()"
-        :keys= "{'f': 'same','j': 'different'}"
-        :progress="i/ mr_training_trials.length"
+        :key="mr_training_trials_task.key"
+        :keys= "random_keys"
         :fixationTime=getRandomFixationTime()
         :responseTime="7500"
-        :feedbackTime="800"
+        :feedbackTime="800" 
       >
 
-      <template #stimulus>
-        <img :src="mr_training_trials_task.picture"/>
-        <Record :data="{
-              angle: mr_training_trials_task.angle,
-              expected_answer: mr_training_trials_task.expected,
-              item_number: mr_training_trials_task.item,
-              trial_type: 'training_trial',
-              trail_number: i
-            }" />
-      </template>
+        <template #stimulus>
+          <img :src="mr_training_trials_task.picture"/>
+          <Record :data="{
+                angle: mr_training_trials_task.angle,
+                expected_answer: mr_training_trials_task.expected,
+                item_number: mr_training_trials_task.item,
+                trial_type: 'training_trial',
+                trail_number: i
+              }" />
+        </template>
 
-      <template #feedback>
-          Hello, Feedback!
-          <p v-if="!$magpie.measurements.hasOwnProperty('response')">Faster!</p>
-          <p v-else-if="$magpie.measurements.response === expected_answer">Your answer is correct!</p>
-          <p v-else>Sorry, your answer is wrong.</p>
+        <template #feedback>
+            Hello, Feedback!
+            <p v-if="!$magpie.measurements.hasOwnProperty('response')">Faster!</p>
+            <p v-else-if="$magpie.measurements.response === expected_answer">Your answer is correct!</p>
+            <p v-else>Sorry, your answer is wrong.</p>
         </template>
 
       <!-- <template #feedback>
@@ -96,7 +95,10 @@ export default {
     return {
       mr_training_trials: _.shuffle(mr_training_trials),
       mr_main_trials: _.shuffle(mr_main_trials),
-      
+      random_keys: _.sample([
+        {f: 'same', j: 'different'},
+        {f: 'different', j: 'same'},
+      ])
 
       // // Expose lodash.range to template above
       // range: _.range
@@ -106,6 +108,12 @@ export default {
     getRandomFixationTime() {
       return _.sample(['200','300','400','500'])
     }
+  },
+  mounted() {
+    this.$magpie.addExpData({
+      key1 : this.keys.f,
+      key2: this.keys.j
+    });
   }
 };
 
